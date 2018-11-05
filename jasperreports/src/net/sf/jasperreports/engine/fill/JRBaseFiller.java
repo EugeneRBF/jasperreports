@@ -1174,6 +1174,14 @@ public abstract class JRBaseFiller extends BaseReportFiller implements JRDefault
 	}
 
 	/**
+	 *
+	 * @return Remains rows in dataset
+	 */
+	protected int remainsRows() {
+		return mainDataset.remainsRows();
+	}
+
+	/**
 	 * Resolves elements which are to be evaluated at report level.
 	 */
 	protected void resolveReportBoundElements() throws JRException

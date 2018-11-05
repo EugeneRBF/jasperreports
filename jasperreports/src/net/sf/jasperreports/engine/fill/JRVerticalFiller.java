@@ -23,15 +23,10 @@
  */
 package net.sf.jasperreports.engine.fill;
 
+import net.sf.jasperreports.engine.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExpression;
-import net.sf.jasperreports.engine.JRGroup;
-import net.sf.jasperreports.engine.JRRuntimeException;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.type.FooterPositionEnum;
 import net.sf.jasperreports.engine.type.IncrementTypeEnum;
 import net.sf.jasperreports.engine.type.ResetTypeEnum;
@@ -724,6 +719,32 @@ public class JRVerticalFiller extends JRBaseFiller
 		}
 	}
 
+	private int remainsHeight(JRFillBand current ) {
+		int ix;
+		boolean isFound = false;
+		int height = 0;
+		for ( ix = 0; ix < bands.size(); ix++ ) {
+			if ( bands.get(ix) == current ) {
+				isFound = true;
+				break;
+			}
+		}
+		if ( isFound ) {
+			ix++;
+			for ( ix = 0; ix < bands.size(); ix++ ) {
+				height += bands.get(ix).getHeight();
+			}
+		}
+		return height;
+	}
+
+	private int getMinimumRows() {
+		Object rows = mainDataset.getParameterValue("minimum_detail_rows_on_the_last_page", true);
+		if ( rows != null && rows instanceof Integer ) {
+			return (int) rows;
+		}
+		return -1;
+	}
 
 	/**
 	 *
@@ -740,23 +761,35 @@ public class JRVerticalFiller extends JRBaseFiller
 			calculator.estimateVariables();
 		}
 
+		int minimum_rows = getMinimumRows();
+
 		JRFillBand[] detailBands = detailSection.getFillBands();
 		for (int i = 0; i < detailBands.length; i++)
 		{
 			JRFillBand detailBand = detailBands[i];
+			int remainsHeight = remainsHeight(detailBand);
 			
 			detailBand.evaluatePrintWhenExpression(JRExpression.EVALUATION_ESTIMATED);
 
 			if (detailBand.isToPrint())
 			{
-				while (
-					detailBand.getBreakHeight() > columnFooterOffsetY - offsetY
-					)
-				{
+				if ( minimum_rows >= 0
+						&& detailBand.getBreakHeight() > 0
+						&& detailBand.getBreakHeight()+remainsHeight > columnFooterOffsetY - offsetY
+						&& remainsRows() <= minimum_rows ) {
 					fillColumnBreak(
-						isCrtRecordOnColumn ? JRExpression.EVALUATION_DEFAULT : JRExpression.EVALUATION_OLD,
-						JRExpression.EVALUATION_DEFAULT
+							isCrtRecordOnColumn ? JRExpression.EVALUATION_DEFAULT : JRExpression.EVALUATION_OLD,
+							JRExpression.EVALUATION_DEFAULT
+					);
+				} else {
+					while (
+							detailBand.getBreakHeight() > columnFooterOffsetY - offsetY
+							) {
+						fillColumnBreak(
+								isCrtRecordOnColumn ? JRExpression.EVALUATION_DEFAULT : JRExpression.EVALUATION_OLD,
+								JRExpression.EVALUATION_DEFAULT
 						);
+					}
 				}
 				
 				break;

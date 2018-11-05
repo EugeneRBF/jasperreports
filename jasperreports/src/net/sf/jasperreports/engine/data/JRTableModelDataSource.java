@@ -32,15 +32,15 @@ import java.util.HashMap;
 
 import javax.swing.table.TableModel;
 
+import net.sf.jasperreports.engine.JRCountableDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
-import net.sf.jasperreports.engine.JRRewindableDataSource;
 
 
 /**
  * @author Teodor Danciu (teodord@users.sourceforge.net)
  */
-public class JRTableModelDataSource implements JRRewindableDataSource
+public class JRTableModelDataSource implements JRCountableDataSource
 {
 	
 	public static final String EXCEPTION_MESSAGE_KEY_UNKNOWN_COLUMN_NAME = "data.table.model.unknown.column.name";
@@ -50,7 +50,7 @@ public class JRTableModelDataSource implements JRRewindableDataSource
 	 */
 	private TableModel tableModel;
 	private int index = -1;
-	private HashMap<String, Integer> columnNames = new HashMap<String, Integer>();
+	private HashMap<String, Integer> columnNames = new HashMap<>();
 	
 
 	/**
@@ -64,23 +64,17 @@ public class JRTableModelDataSource implements JRRewindableDataSource
 		{
 			for(int i = 0; i < tableModel.getColumnCount(); i++)
 			{
-				this.columnNames.put(tableModel.getColumnName(i), Integer.valueOf(i));
+				this.columnNames.put(tableModel.getColumnName(i), i);
 			}
 		}
 	}
 	
 
 	@Override
-	public boolean next()
-	{
+	public boolean next() {
 		this.index++;
 
-		if (this.tableModel != null)
-		{
-			return (this.index < this.tableModel.getRowCount());
-		}
-
-		return false;
+		return this.tableModel != null && (this.index < this.tableModel.getRowCount());
 	}
 	
 	
@@ -93,7 +87,7 @@ public class JRTableModelDataSource implements JRRewindableDataSource
 		
 		if (columnIndex != null)
 		{
-			return this.tableModel.getValueAt(index, columnIndex.intValue());
+			return this.tableModel.getValueAt(index, columnIndex);
 		}
 		else if (fieldName.startsWith("COLUMN_"))
 		{
@@ -116,4 +110,8 @@ public class JRTableModelDataSource implements JRRewindableDataSource
 	}
 
 
+	@Override
+	public int getRecordCount() {
+		return this.tableModel == null ? 0 : this.tableModel.getRowCount();
+	}
 }

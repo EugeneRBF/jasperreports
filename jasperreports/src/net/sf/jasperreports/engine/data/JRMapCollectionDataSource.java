@@ -27,13 +27,13 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.sf.jasperreports.engine.JRCountableDataSource;
 import net.sf.jasperreports.engine.JRField;
-import net.sf.jasperreports.engine.JRRewindableDataSource;
 
 /**
  * @author Teodor Danciu (teodord@users.sourceforge.net)
  */
-public class JRMapCollectionDataSource implements JRRewindableDataSource
+public class JRMapCollectionDataSource implements JRCountableDataSource
 {
 
 	/**
