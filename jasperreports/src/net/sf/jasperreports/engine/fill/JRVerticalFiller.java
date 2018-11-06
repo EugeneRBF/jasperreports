@@ -731,7 +731,7 @@ public class JRVerticalFiller extends JRBaseFiller
 		}
 		if ( isFound ) {
 			ix++;
-			for ( ix = 0; ix < bands.size(); ix++ ) {
+			for ( ; ix < bands.size(); ix++ ) {
 				height += bands.get(ix).getHeight();
 			}
 		}
