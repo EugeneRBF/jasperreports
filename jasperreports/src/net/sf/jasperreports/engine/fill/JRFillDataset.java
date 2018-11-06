@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import net.sf.jasperreports.engine.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -46,33 +47,6 @@ import net.sf.jasperreports.data.cache.DataRecorder;
 import net.sf.jasperreports.data.cache.DataSnapshot;
 import net.sf.jasperreports.data.cache.DataSnapshotException;
 import net.sf.jasperreports.data.cache.DatasetRecorder;
-import net.sf.jasperreports.engine.DatasetFilter;
-import net.sf.jasperreports.engine.DatasetPropertyExpression;
-import net.sf.jasperreports.engine.DefaultJasperReportsContext;
-import net.sf.jasperreports.engine.EvaluationType;
-import net.sf.jasperreports.engine.JRAbstractScriptlet;
-import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JRDataset;
-import net.sf.jasperreports.engine.JRDefaultScriptlet;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExpression;
-import net.sf.jasperreports.engine.JRField;
-import net.sf.jasperreports.engine.JRGroup;
-import net.sf.jasperreports.engine.JRParameter;
-import net.sf.jasperreports.engine.JRPropertiesHolder;
-import net.sf.jasperreports.engine.JRPropertiesMap;
-import net.sf.jasperreports.engine.JRPropertiesUtil;
-import net.sf.jasperreports.engine.JRQuery;
-import net.sf.jasperreports.engine.JRRuntimeException;
-import net.sf.jasperreports.engine.JRScriptlet;
-import net.sf.jasperreports.engine.JRSortField;
-import net.sf.jasperreports.engine.JRVariable;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.JasperReportsContext;
-import net.sf.jasperreports.engine.ParameterContributor;
-import net.sf.jasperreports.engine.ParameterContributorContext;
-import net.sf.jasperreports.engine.ParameterContributorFactory;
 import net.sf.jasperreports.engine.data.IndexedDataSource;
 import net.sf.jasperreports.engine.design.JRDesignVariable;
 import net.sf.jasperreports.engine.query.JRQueryExecuter;
@@ -228,6 +202,11 @@ public class JRFillDataset implements JRDataset, DatasetFillContext
 	 * The cursor used when iterating the data source.
 	 */
 	protected int reportCount;
+
+	/**
+	 * The total data lines for JRCountableDatasource's or MAX_INT value.
+	 */
+	protected int totalCount;
 
 	/**
 	 * The calculator used by the dataset.
@@ -1352,6 +1331,11 @@ public class JRFillDataset implements JRDataset, DatasetFillContext
 		cacheRecordCount = 0;
 		previousCacheRecordIndex = 0;
 		currentCacheRecordIndex = 0;
+		if ( dataSource instanceof JRCountableDataSource ) {
+			totalCount = ((JRCountableDataSource)dataSource).getRecordCount();
+		} else {
+			totalCount = Integer.MAX_VALUE;
+		}
 	}
 
 	
@@ -1467,6 +1451,17 @@ public class JRFillDataset implements JRDataset, DatasetFillContext
 
 		return hasNext;
 	}
+
+	/**
+	 * Calculate how much records remains in the data source.
+	 *
+	 * @return remains rows in dataset include current, or some nearly MAX_INT, if Datasource haven't total rows
+	 */
+	public int remainsRows()
+	{
+		return totalCount-reportCount+1;
+	}
+
 
 	protected void advanceCacheRecordIndexes()
 	{

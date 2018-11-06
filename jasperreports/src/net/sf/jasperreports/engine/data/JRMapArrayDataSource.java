@@ -25,14 +25,14 @@ package net.sf.jasperreports.engine.data;
 
 import java.util.Map;
 
+import net.sf.jasperreports.engine.JRCountableDataSource;
 import net.sf.jasperreports.engine.JRField;
-import net.sf.jasperreports.engine.JRRewindableDataSource;
 
 
 /**
  * @author Teodor Danciu (teodord@users.sourceforge.net)
  */
-public class JRMapArrayDataSource implements JRRewindableDataSource
+public class JRMapArrayDataSource implements JRCountableDataSource
 {
 	
 
@@ -53,16 +53,10 @@ public class JRMapArrayDataSource implements JRRewindableDataSource
 	
 
 	@Override
-	public boolean next()
-	{
+	public boolean next() {
 		index++;
 
-		if (records != null)
-		{
-			return (index < records.length);
-		}
-
-		return false;
+		return records != null && (index < records.length);
 	}
 	
 	

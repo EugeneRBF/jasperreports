@@ -26,6 +26,7 @@ package net.sf.jasperreports.engine.data;
 import java.util.Collection;
 import java.util.Iterator;
 
+import net.sf.jasperreports.engine.JRCountableDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 
@@ -42,7 +43,7 @@ import net.sf.jasperreports.engine.JRField;
  * 
  * @author Teodor Danciu (teodord@users.sourceforge.net)
  */
-public class JRBeanCollectionDataSource extends JRAbstractBeanDataSource
+public class JRBeanCollectionDataSource extends JRAbstractBeanDataSource implements JRCountableDataSource
 {
 	
 
