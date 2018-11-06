@@ -1,6 +1,6 @@
 /*
  * JasperReports - Free Java Reporting Library.
- * Copyright (C) 2001 - 2016 TIBCO Software Inc. All rights reserved.
+ * Copyright (C) 2001 - 2018 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com
  *
  * Unless you have purchased a commercial license agreement from Jaspersoft,
@@ -127,6 +127,19 @@ public class I18nApp extends AbstractSampleApp
 		if (locale != null)
 		{
 			JasperViewer.viewReport("build/reports/I18nReport.jrprint", false, true, locale);
+		}
+	}
+
+
+	/**
+	 *
+	 */
+	public void viewXml() throws JRException
+	{
+		Locale locale = chooseLocale();
+		if (locale != null)
+		{
+			JasperViewer.viewReport("build/reports/I18nReport.jrpxml", true, true, locale);
 		}
 	}
 

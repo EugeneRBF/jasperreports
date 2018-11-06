@@ -1,6 +1,6 @@
 /*
  * JasperReports - Free Java Reporting Library.
- * Copyright (C) 2001 - 2016 TIBCO Software Inc. All rights reserved.
+ * Copyright (C) 2001 - 2018 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com
  *
  * Unless you have purchased a commercial license agreement from Jaspersoft,
@@ -139,7 +139,6 @@ import net.sf.jasperreports.renderers.Graphics2DRenderable;
 import net.sf.jasperreports.renderers.Renderable;
 import net.sf.jasperreports.renderers.RenderersCache;
 import net.sf.jasperreports.renderers.ResourceRenderer;
-import net.sf.jasperreports.repo.RepositoryUtil;
 
 
 /**
@@ -272,7 +271,7 @@ public class JRXlsMetadataExporter extends JRXlsAbstractMetadataExporter<XlsMeta
 		} else {
 			InputStream templateIs = null;
 			try {
-				templateIs = RepositoryUtil.getInstance(jasperReportsContext).getInputStreamFromLocation(lcWorkbookTemplate);
+				templateIs = getRepository().getInputStreamFromLocation(lcWorkbookTemplate);
 				if (templateIs == null)	{
 					throw 
 						new JRRuntimeException(

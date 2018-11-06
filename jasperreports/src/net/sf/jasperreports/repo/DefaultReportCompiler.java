@@ -1,6 +1,6 @@
 /*
  * JasperReports - Free Java Reporting Library.
- * Copyright (C) 2001 - 2016 TIBCO Software Inc. All rights reserved.
+ * Copyright (C) 2001 - 2018 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com
  *
  * Unless you have purchased a commercial license agreement from Jaspersoft,
@@ -25,6 +25,7 @@ package net.sf.jasperreports.repo;
 
 import java.io.Serializable;
 
+import net.sf.jasperreports.engine.JRConstants;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReport;
@@ -34,8 +35,11 @@ import net.sf.jasperreports.engine.design.JasperDesign;
 /**
  * @author Lucian Chirita (lucianc@users.sourceforge.net)
  */
-public class DefaultReportCompiler implements ReportCompiler, Serializable
+public class DefaultReportCompiler implements ReportCompiler, Serializable//TODO lucianc remove the need to serialize
 {
+	
+	private static final long serialVersionUID = JRConstants.SERIAL_VERSION_UID;
+	
 	private JasperReportsContext jasperReportsContext;
 
 	public DefaultReportCompiler(JasperReportsContext jasperReportsContext)

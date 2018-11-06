@@ -1,6 +1,6 @@
 /*
  * JasperReports - Free Java Reporting Library.
- * Copyright (C) 2001 - 2016 TIBCO Software Inc. All rights reserved.
+ * Copyright (C) 2001 - 2018 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com
  *
  * Unless you have purchased a commercial license agreement from Jaspersoft,
@@ -23,6 +23,7 @@
  */
 package net.sf.jasperreports.engine.fill;
 
+import org.apache.commons.javaflow.api.continuable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -72,7 +73,16 @@ public class JRHorizontalFiller extends JRBaseFiller
 		BandReportFillerParent parent 
 		) throws JRException
 	{
-		super(jasperReportsContext, jasperReport, parent);
+		this(jasperReportsContext, SimpleJasperReportSource.from(jasperReport), parent);
+	}
+
+	public JRHorizontalFiller(
+		JasperReportsContext jasperReportsContext, 
+		JasperReportSource reportSource,
+		BandReportFillerParent parent 
+		) throws JRException
+	{
+		super(jasperReportsContext, reportSource, parent);
 
 		setPageHeight(pageHeight);
 	}
@@ -96,6 +106,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 
 
 	@Override
+	@continuable
 	protected synchronized void fillReport() throws JRException
 	{
 		setLastPageFooter(false);
@@ -226,6 +237,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillReportStart() throws JRException
 	{
 		scriptlet.callBeforeReportInit();
@@ -263,6 +275,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillReportContent() throws JRException
 	{
 		calculator.estimateGroupRuptures();
@@ -283,6 +296,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillReportEnd() throws JRException
 	{
 		fillGroupFooters(true);
@@ -294,6 +308,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	 private void fillTitle() throws JRException
 	 {
 		if (log.isDebugEnabled() && !title.isEmpty())
@@ -378,6 +393,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillPageHeader(byte evaluation) throws JRException
 	{
 		if (log.isDebugEnabled() && !pageHeader.isEmpty())
@@ -461,6 +477,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillColumnHeaders(byte evaluation) throws JRException
 	{
 		if (log.isDebugEnabled() && !columnHeader.isEmpty())
@@ -528,6 +545,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillGroupHeaders(boolean isFillAll) throws JRException
 	{
 		if (groups != null && groups.length > 0)
@@ -548,6 +566,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillGroupHeader(JRFillGroup group) throws JRException
 	{
 		JRFillSection groupHeaderSection = (JRFillSection)group.getGroupHeaderSection();
@@ -665,6 +684,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillGroupHeadersReprint(byte evaluation) throws JRException
 	{
 		if (groups != null && groups.length > 0)
@@ -698,6 +718,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	 private void fillGroupHeaderReprint(JRFillGroup group, byte evaluation) throws JRException
 	 {
 		JRFillSection groupHeaderSection = (JRFillSection)group.getGroupHeaderSection();
@@ -730,6 +751,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillDetail() throws JRException
 	{
 		if (log.isDebugEnabled() && !detailSection.isEmpty())
@@ -876,6 +898,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillGroupFooters(boolean isFillAll) throws JRException
 	{
 		if (groups != null && groups.length > 0)
@@ -952,6 +975,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillGroupFooter(JRFillGroup group, byte evaluation) throws JRException
 	{
 		JRFillSection groupFooterSection = (JRFillSection)group.getGroupFooterSection();
@@ -1189,6 +1213,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillSummary() throws JRException
 	{
 		if (log.isDebugEnabled() && !summary.isEmpty())
@@ -1239,6 +1264,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillSummaryNoLastFooterSamePage() throws JRException
 	{
 		summary.evaluatePrintWhenExpression(JRExpression.EVALUATION_DEFAULT);
@@ -1357,6 +1383,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillSummaryNoLastFooterNewPage() throws JRException
 	{
 		// do nothing about groupFooterPositionElementRange because the following fillColumnFooter will do
@@ -1431,6 +1458,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillSummaryWithLastFooterAndPageBands() throws JRException
 	{
 		if (
@@ -1668,6 +1696,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillSummaryWithLastFooterNoPageBands() throws JRException
 	{
 		if (
@@ -2066,6 +2095,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillSummaryOverflow() throws JRException
 	{
 		while (summary.willOverflow())
@@ -2166,6 +2196,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void addPage(boolean isResetPageNumber) throws JRException
 	{
 		if (isSubreport())
@@ -2219,6 +2250,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillPageBreak(
 		boolean isResetPageNumber,
 		byte evalPrevPage,
@@ -2403,6 +2435,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	protected void fillColumnBand(JRFillBand band, byte evaluation) throws JRException
 	{
 		band.evaluate(evaluation);
@@ -2604,6 +2637,7 @@ public class JRHorizontalFiller extends JRBaseFiller
 	/**
 	 *
 	 */
+	@continuable
 	private void fillNoData() throws JRException
 	{
 		if (log.isDebugEnabled() && !noData.isEmpty())

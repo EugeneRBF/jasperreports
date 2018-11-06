@@ -1,6 +1,6 @@
 /*
  * JasperReports - Free Java Reporting Library.
- * Copyright (C) 2001 - 2016 TIBCO Software Inc. All rights reserved.
+ * Copyright (C) 2001 - 2018 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com
  *
  * Unless you have purchased a commercial license agreement from Jaspersoft,
@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URL;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -47,11 +48,13 @@ import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.SimpleJasperReportsContext;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRXmlExporter;
 import net.sf.jasperreports.engine.export.XmlResourceHandler;
 import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.engine.util.JRResourcesUtil;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleXmlExporterOutput;
@@ -65,60 +68,87 @@ public abstract class AbstractTest
 	
 	private static final String TEST = "TEST";
 
-	private JasperFillManager fillManager;
+	private JasperReportsContext jasperReportsContext;
 
 	@BeforeClass
 	public void init() throws JRException, IOException
 	{
-		SimpleJasperReportsContext jasperReportsContext = new SimpleJasperReportsContext();
-		
-		fillManager = JasperFillManager.getInstance(jasperReportsContext);
+		jasperReportsContext = new SimpleJasperReportsContext();
 	}
 
-	protected void testReports(String folderName, String fileNamePrefix, int maxFileNumber) throws JRException, NoSuchAlgorithmException, IOException
+	protected Object[][] runReportArgs(String folderName, String fileNamePrefix, int maxFileNumber)
 	{
+		return runReportArgs(folderName, fileNamePrefix, fileNamePrefix, maxFileNumber);
+	}
+
+	protected Object[][] runReportArgs(String folderName, String fileNamePrefix, String exportFileNamePrefix, int maxFileNumber)
+	{
+		Object[][] args = new Object[maxFileNumber][];
+		for (int i = 1; i <= maxFileNumber; i++)
+		{
+			String jrxmlFileName = folderName + "/" + fileNamePrefix + "." + i + ".jrxml";
+			String referenceFileNamePrefix = folderName + "/" + exportFileNamePrefix + "." + i + ".reference";
+			args[i - 1] = new Object[] {jrxmlFileName, referenceFileNamePrefix};
+		}
+		return args;
+	}
+
+	protected void runReport(String jrxmlFileName, String referenceFileNamePrefix) 
+			throws JRException, IOException, NoSuchAlgorithmException, FileNotFoundException
+	{
+		JasperFillManager fillManager = JasperFillManager.getInstance(getJasperReportsContext());
+		
 		HashMap<String, Object> params = new HashMap<String, Object>();
 		params.put(JRParameter.REPORT_LOCALE, Locale.US);
 		params.put(JRParameter.REPORT_TIME_ZONE, TimeZone.getTimeZone("GMT"));
 		params.put(TEST, this);
 		
-		for (int i = 1; i <= maxFileNumber; i++)
+		log.debug("Running report " + jrxmlFileName);
+		
+		try
 		{
-			String jrxmlFileName = folderName + "/" + fileNamePrefix + "." + i + ".jrxml";
-			log.debug("Running report " + jrxmlFileName);
-			
 			JasperReport report = compileReport(jrxmlFileName);
 			if (report != null)
 			{
-				String exportDigest = null;
-				String referenceExportDigest = null;
-
-				JasperPrint print = null;
-				try
-				{
-					print = fillManager.fill(report, params);
-				}
-				catch (Throwable t)
-				{
-					exportDigest = errExportDigest(t);
-					referenceExportDigest = getFileDigest(folderName + "/" + fileNamePrefix + "." + i + ".reference.err");
-				}
+				JasperPrint print = fillManager.fill(report, params);
 				
-				if (print != null)
-				{
-					assert !print.getPages().isEmpty();
-					
-					exportDigest = xmlExportDigest(print);
-					log.debug("Plain report got " + exportDigest);
-					
-					referenceExportDigest = getFileDigest(folderName + "/" + fileNamePrefix + "." + i + ".reference.jrpxml");
-				}
+				assert !print.getPages().isEmpty();
 				
+				String exportDigest = xmlExportDigest(print);
+				log.debug("Plain report got " + exportDigest);
+				
+				String referenceExportDigest = getFileDigest(referenceFileNamePrefix + ".jrpxml");
 				assert exportDigest.equals(referenceExportDigest);
 			}
 		}
+		catch (Throwable t)
+		{
+			String errorDigest = errExportDigest(t);
+			String referenceErrorDigest = getFileDigest(referenceFileNamePrefix + ".err");
+			if (referenceErrorDigest == null)
+			{
+				log.error("Report " + jrxmlFileName + " failed", t);
+				//we don't have a reference error, it's an unexpected exception
+				throw t;
+			}
+			
+			assert errorDigest.equals(referenceErrorDigest);
+		}
 	}
 
+	protected JasperReportsContext getJasperReportsContext()
+	{
+		return jasperReportsContext;
+	}
+
+	protected void setJasperReportsContext(JasperReportsContext jasperReportsContext)
+	{
+		this.jasperReportsContext = jasperReportsContext;
+	}
+
+	/**
+	 * This method is used for compiling subreports.
+	 */
 	public JasperReport compileReport(String jrxmlFileName) throws JRException, IOException
 	{
 		JasperReport jasperReport = null;
@@ -151,11 +181,18 @@ public abstract class AbstractTest
 
 	protected String getFileDigest(String fileName) throws JRException, NoSuchAlgorithmException
 	{
-		byte[] bytes = JRLoader.loadBytesFromResource(fileName);
+		URL resourceURL = JRResourcesUtil.findClassLoaderResource(fileName, null);
+		if (resourceURL == null)
+		{
+			log.debug("did not find resource " + fileName);
+			return null;
+		}
+		
+		byte[] bytes = JRLoader.loadBytes(resourceURL);
 		MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
 		messageDigest.update(bytes);
 		String digest = toDigestString(messageDigest);
-		log.debug("Reference report digest is " + digest);
+		log.debug("Reference report digest is " + digest + " for " + fileName);
 		return digest;
 	}
 	
@@ -195,7 +232,7 @@ public abstract class AbstractTest
 			//PrintStream ps = new PrintStream(out);
 			//t.printStackTrace(ps);
 			osw = new OutputStreamWriter(out, "UTF-8");
-			osw.write(t.getMessage());
+			osw.write(String.valueOf(t.getMessage()));
 		}
 		finally
 		{

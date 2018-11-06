@@ -1,6 +1,6 @@
 /*
  * JasperReports - Free Java Reporting Library.
- * Copyright (C) 2001 - 2016 TIBCO Software Inc. All rights reserved.
+ * Copyright (C) 2001 - 2018 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com
  *
  * Unless you have purchased a commercial license agreement from Jaspersoft,
@@ -45,7 +45,9 @@ import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JRRuntimeException;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.util.FormatUtils;
+import net.sf.jasperreports.repo.RepositoryContext;
 import net.sf.jasperreports.repo.RepositoryUtil;
+import net.sf.jasperreports.repo.SimpleRepositoryContext;
 
 
 /**
@@ -113,7 +115,12 @@ public abstract class AbstractPoiXlsDataSource extends AbstractXlsDataSource
 	 */
 	public AbstractPoiXlsDataSource(JasperReportsContext jasperReportsContext, String location) throws JRException, IOException
 	{
-		this(RepositoryUtil.getInstance(jasperReportsContext).getInputStreamFromLocation(location));
+		this(SimpleRepositoryContext.of(jasperReportsContext), location);
+	}
+
+	public AbstractPoiXlsDataSource(RepositoryContext context, String location) throws JRException, IOException
+	{
+		this(RepositoryUtil.getInstance(context).getInputStreamFromLocation(location));
 		this.closeInputStream = true;
 	}
 

@@ -1,6 +1,6 @@
 /*
  * JasperReports - Free Java Reporting Library.
- * Copyright (C) 2001 - 2016 TIBCO Software Inc. All rights reserved.
+ * Copyright (C) 2001 - 2018 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com
  *
  * Unless you have purchased a commercial license agreement from Jaspersoft,
@@ -25,6 +25,7 @@ package net.sf.jasperreports.engine.fill;
 
 import java.util.List;
 
+import org.apache.commons.javaflow.api.continuable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -112,7 +113,7 @@ public class FillerSubreportParent implements BandReportFillerParent
 	@Override
 	public boolean isSplitTypePreventInhibited(boolean isTopLevelCall)
 	{
-		return parentElement.getBand().isSplitTypePreventInhibited(isTopLevelCall);
+		return parentElement.isSplitTypePreventInhibited(isTopLevelCall);
 	}
 
 	@Override
@@ -127,6 +128,7 @@ public class FillerSubreportParent implements BandReportFillerParent
 	}
 
 	@Override
+	@continuable
 	public void addPage(FillerPageAddedEvent pageAdded) throws JRException
 	{
 		currentPageStretchHeight = pageAdded.getPageStretchHeight();
@@ -146,6 +148,7 @@ public class FillerSubreportParent implements BandReportFillerParent
 		}
 	}
 
+	@continuable
 	protected void suspendSubreportRunner(FillerPageAddedEvent pageAdded) throws JRException
 	{
 		if (subreportRunner == null)

@@ -1,6 +1,6 @@
 /*
  * JasperReports - Free Java Reporting Library.
- * Copyright (C) 2001 - 2016 TIBCO Software Inc. All rights reserved.
+ * Copyright (C) 2001 - 2018 TIBCO Software Inc. All rights reserved.
  * http://www.jaspersoft.com
  *
  * Unless you have purchased a commercial license agreement from Jaspersoft,
@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import net.sf.jasperreports.engine.JRConstants;
 import net.sf.jasperreports.engine.JRElement;
 import net.sf.jasperreports.engine.JRElementGroup;
 import net.sf.jasperreports.engine.JRParameter;
@@ -56,6 +57,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="actionName")
 public abstract class AbstractAction implements Action, Serializable {
+	
+	private static final long serialVersionUID = JRConstants.SERIAL_VERSION_UID;
 	
 	public static final String PARAM_COMMAND_STACK = "net.sf.jasperreports.command.stack";
 	public static final String ERR_CONCAT_STRING = "<#_#>";
@@ -113,6 +116,8 @@ public abstract class AbstractAction implements Action, Serializable {
 
 
 	public static class ActionErrors implements Serializable {
+		
+		private static final long serialVersionUID = JRConstants.SERIAL_VERSION_UID;
 
 		private JasperReportsContext jasperReportsContext;
 		private transient MessageProvider messageProvider;
