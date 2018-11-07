@@ -719,23 +719,12 @@ public class JRVerticalFiller extends JRBaseFiller
 		}
 	}
 
-	private int remainsHeight(JRFillBand current ) {
-		int ix;
-		boolean isFound = false;
-		int height = 0;
-		for ( ix = 0; ix < bands.size(); ix++ ) {
-			if ( bands.get(ix) == current ) {
-				isFound = true;
-				break;
-			}
+	private int remainsHeight() {
+		Object height = mainDataset.getParameterValue("details_break_height", true);
+		if ( height != null && height instanceof Integer ) {
+			return (int) height;
 		}
-		if ( isFound ) {
-			ix++;
-			for ( ix = 0; ix < bands.size(); ix++ ) {
-				height += bands.get(ix).getHeight();
-			}
-		}
-		return height;
+		return 0;
 	}
 
 	private int getMinimumRows() {
@@ -762,20 +751,20 @@ public class JRVerticalFiller extends JRBaseFiller
 		}
 
 		int minimum_rows = getMinimumRows();
+		int remainsHeight = remainsHeight();
 
 		JRFillBand[] detailBands = detailSection.getFillBands();
 		for (int i = 0; i < detailBands.length; i++)
 		{
 			JRFillBand detailBand = detailBands[i];
-			int remainsHeight = remainsHeight(detailBand);
-			
+
 			detailBand.evaluatePrintWhenExpression(JRExpression.EVALUATION_ESTIMATED);
 
 			if (detailBand.isToPrint())
 			{
 				if ( minimum_rows >= 0
 						&& detailBand.getBreakHeight() > 0
-						&& detailBand.getBreakHeight()+remainsHeight > columnFooterOffsetY - offsetY
+						&& detailBand.getBreakHeight() + remainsHeight > columnFooterOffsetY - offsetY
 						&& remainsRows() <= minimum_rows ) {
 					fillColumnBreak(
 							isCrtRecordOnColumn ? JRExpression.EVALUATION_DEFAULT : JRExpression.EVALUATION_OLD,
